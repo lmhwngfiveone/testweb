@@ -3,28 +3,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const noBtn = document.getElementById('noBtn');
     const retryMessage = document.getElementById('retryMessage');
     const thankYouMessage = document.getElementById('thankYouMessage');
-    const fireworksContainer = document.querySelector('.fireworks-container'); // Vẫn dùng chung container này
+    const fireworksContainer = document.querySelector('.fireworks-container');
     const question = document.querySelector('.question');
     const title = document.querySelector('h1');
     const buttonsDiv = document.querySelector('.buttons');
 
-    // Biến để lưu trữ interval của hiệu ứng
+    // **THAY THẾ ĐƯỜNG LINK NÀY BẰNG ENDPOINT URL CỦA FORMSPREE CỦA BẠN**
+    const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xqabdvlg'; 
+    // Ví dụ: const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mleazwqa';
+
     let heartsInterval;
     let bubblesInterval;
 
+    // Hàm gửi dữ liệu đến Formspree
+    async function sendChoiceToFormspree(choice) {
+        try {
+            const response = await fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json' // Quan trọng để nhận phản hồi JSON từ Formspree
+                },
+                body: JSON.stringify({
+                    'lựa chọn': choice, // Tên trường bạn muốn thấy trong email
+                    'thời gian': new Date().toLocaleString() // Thêm thời gian lựa chọn
+                })
+            });
+
+            if (response.ok) {
+                console.log('Lựa chọn đã được gửi thành công!');
+                // Bạn có thể thêm xử lý thành công ở đây nếu muốn
+            } else {
+                console.error('Có lỗi khi gửi lựa chọn:', response.statusText);
+                // Xử lý lỗi nếu cần
+            }
+        } catch (error) {
+            console.error('Lỗi mạng hoặc lỗi khác:', error);
+        }
+    }
+
+
     // Xử lý khi nhấn nút "Không"
     noBtn.addEventListener('click', () => {
+        // Gửi lựa chọn "Không" đến Formspree
+        sendChoiceToFormspree('Không');
+
         // Hiện thông báo "Vui lòng chọn lại"
         retryMessage.classList.remove('hidden');
 
         // Làm nút "Có" lớn hơn
         let currentYesFontSize = parseFloat(window.getComputedStyle(yesBtn).fontSize);
-        yesBtn.style.fontSize = (currentYesFontSize * 1.2) + 'px'; // Tăng 20%
-        yesBtn.style.padding = (parseFloat(window.getComputedStyle(yesBtn).paddingTop) * 1.2) + 'px ' + (parseFloat(window.getComputedStyle(yesBtn).paddingLeft) * 1.2) + 'px'; // Tăng padding
+        yesBtn.style.fontSize = (currentYesFontSize * 1.2) + 'px';
+        yesBtn.style.padding = (parseFloat(window.getComputedStyle(yesBtn).paddingTop) * 1.2) + 'px ' + (parseFloat(window.getComputedStyle(yesBtn).paddingLeft) * 1.2) + 'px';
     });
 
     // Xử lý khi nhấn nút "Có"
     yesBtn.addEventListener('click', () => {
+        // Gửi lựa chọn "Có" đến Formspree
+        sendChoiceToFormspree('Có');
+
         // Ẩn tất cả các phần tử khác
         question.classList.add('hidden');
         buttonsDiv.classList.add('hidden');
@@ -40,19 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hàm bắt đầu hiệu ứng trái tim rơi và bong bóng bay
     function startLoveEffects() {
-        // Xóa bất kỳ hiệu ứng nào đang chạy để tránh trùng lặp nếu người dùng nhấn lại
         clearInterval(heartsInterval);
         clearInterval(bubblesInterval);
 
-        // Tạo trái tim rơi từ trên xuống
         heartsInterval = setInterval(() => {
             createFallingHeart();
-        }, 200); // Tạo một trái tim mỗi 200ms
+        }, 200);
 
-        // Tạo bong bóng bay từ dưới lên
         bubblesInterval = setInterval(() => {
             createBubble();
-        }, 150); // Tạo một bong bóng mỗi 150ms
+        }, 150);
     }
 
     // Hàm tạo trái tim rơi
@@ -61,12 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
         heart.classList.add('falling-heart');
         fireworksContainer.appendChild(heart);
 
-        const size = Math.random() * 25 + 15; // Kích thước ngẫu nhiên từ 15px đến 40px
+        const size = Math.random() * 25 + 15;
         heart.style.width = `${size}px`;
         heart.style.height = `${size}px`;
-        heart.style.left = `${Math.random() * 100}%`; // Vị trí ngang ngẫu nhiên
-        heart.style.animationDuration = `${Math.random() * 3 + 2}s`; // Thời gian rơi ngẫu nhiên từ 2s đến 5s
-        heart.style.animationDelay = `${Math.random() * 0.5}s`; // Độ trễ nhỏ ngẫu nhiên
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        heart.style.animationDelay = `${Math.random() * 0.5}s`;
 
         heart.addEventListener('animationend', () => {
             heart.remove();
@@ -79,18 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
         bubble.classList.add('bubble');
         fireworksContainer.appendChild(bubble);
 
-        const size = Math.random() * 30 + 20; // Kích thước ngẫu nhiên từ 20px đến 50px
+        const size = Math.random() * 30 + 20;
         bubble.style.width = `${size}px`;
         bubble.style.height = `${size}px`;
-        bubble.style.left = `${Math.random() * 100}%`; // Vị trí ngang ngẫu nhiên
-        bubble.style.bottom = `-50px`; // Bắt đầu từ dưới màn hình
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.bottom = `-50px`;
 
-        // Để bong bóng bay hơi chéo
-        const translateXEnd = (Math.random() - 0.5) * 200; // Từ -100px đến 100px
+        const translateXEnd = (Math.random() - 0.5) * 200;
         bubble.style.setProperty('--translateX-end', `${translateXEnd}px`);
 
-        bubble.style.animationDuration = `${Math.random() * 5 + 3}s`; // Thời gian bay ngẫu nhiên từ 3s đến 8s
-        bubble.style.animationDelay = `${Math.random() * 0.5}s`; // Độ trễ nhỏ ngẫu nhiên
+        bubble.style.animationDuration = `${Math.random() * 5 + 3}s`;
+        bubble.style.animationDelay = `${Math.random() * 0.5}s`;
 
         bubble.addEventListener('animationend', () => {
             bubble.remove();
